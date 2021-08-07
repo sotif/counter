@@ -1,0 +1,40 @@
+name: Update
+on:
+  workflow_dispatch:
+  schedule:
+    - cron:  '*/5 * * * *'
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: checkout
+      uses: actions/checkout@v2
+      with:
+        persist-credentials: false
+
+    - name: Get date
+      id: date
+      run: echo "::set-output name=date::$(date +'%Y-%m-%dT%H:%M:%SZ')"
+
+    - name: increment
+      run: |
+        numb=$(< count)
+        ((numb+=1))
+        echo "$numb" > count
+        echo "# Counter" > README.md
+        echo "${{ steps.date.outputs.date }}" >> README.md
+        echo "  " >> README.md
+        echo "---" >> README.md
+        echo "  " >> README.md
+        echo "$numb" >> README.md
+
+    - name: Commit & Push changes
+      uses: actions-js/push@master
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        branch: 'master'
+        author_email: '16354328+sotif@users.noreply.github.com'
+        author_name: 'Sotif'
+        message: 'Auto increment: ${{ steps.date.outputs.date  }}'
